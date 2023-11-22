@@ -1,40 +1,25 @@
 const express = require("express");
-const csv = require("csv-parser");
-const fs = require("fs");
 const cors = require("cors");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+require("dotenv").config();
 
-// Middleware para processar JSON
+const titlesRouter = require("./src/routes/titles");
+
+const app = express(); // Creating an instance of the Express application
+const PORT = process.env.PORT || 3000; // Setting the port to the value specified in the environment variable or defaulting to 3000
+
+// Middleware for processing JSON
 app.use(express.json());
 
-app.use(cors());
+app.use(cors()); // Using CORS middleware to enable cross-origin requests
 
-// Middleware para analisar o corpo da solicitação como JSON
+// Middleware for parsing the request body as JSON
 app.use(express.json());
 
-// Rota para obter um título aleatório do CSV
-app.get("/getRandomTitle", (req, res) => {
-  const titles = [];
-  fs.createReadStream("seu_arquivo.csv")
-    .pipe(csv())
-    .on("data", (row) => {
-      titles.push(row.title);
-    })
-    .on("end", () => {
-      const randomTitle = titles[Math.floor(Math.random() * titles.length)];
-      res.json({ title: randomTitle });
-    });
-});
+app.use("/titles", titlesRouter); // Using the titlesRouter for routes starting with "/titles"
 
-// Rota para receber a classificação e atualizar o CSV
-app.post("/classifyTitle", (req, res) => {
-  const { title, classification } = req.body;
-
-  // Aqui você precisará implementar a lógica para atualizar o CSV com a classificação
-
-  res.json({ success: true });
+app.get("/", (req, res) => {
+  res.send("Hello World");
 });
 
 app.listen(PORT, () => {
